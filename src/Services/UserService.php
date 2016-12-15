@@ -35,13 +35,11 @@ class UserService
      */
     public static function create($config = [])
     {
-        $hostList = isset($config['hosts']) ? $config['hosts'] : ['localhost'];
-        $hosts = implode(',', $hostList);
+        $host = isset($config['host']) ? $config['host'] : ['localhost'];
         $database = isset($config['database']) ? $config['database'] : 'whow';
-        $port = isset($config['port']) ? $config['port'] : '27017';
         $replicaSet = isset($config['replicaSet']) ? $config['replicaSet'] : false;
 
-        $client = new Client("mongodb://$hosts:$port", compact('replicaSet'));
+        $client = new Client("mongodb://$host", compact('replicaSet'));
 
         return new self($client, $database, 'users');
     }
