@@ -1,0 +1,14 @@
+{
+    "require": {
+        "mongodb/mongodb": "^1.0.0"
+    },
+    "require-dev": {
+        "codeception/codeception": "2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Services\\": "src/Services/"
+        }
+    }
+}
+ven
