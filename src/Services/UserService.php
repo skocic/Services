@@ -35,7 +35,7 @@ class UserService
      */
     public static function create($config = [])
     {
-        $host = isset($config['host']) ? $config['host'] : ['localhost'];
+        $host = isset($config['host']) ? $config['host'] : 'localhost';
         $database = isset($config['database']) ? $config['database'] : 'whow';
         $replicaSet = isset($config['replicaSet']) ? $config['replicaSet'] : false;
 
