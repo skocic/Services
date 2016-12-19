@@ -2,28 +2,29 @@
 
 namespace Services;
 
-use MongoDB\Client;
-use MongoDB\BSON\ObjectID;
-use MongoDB\Collection;
+use MongoClient;
+use MongoDate;
+use MongoCollection;
+use MongoId;
 
 class UserService
 {
-    /** @var \MongoDB\Client */
+    /** @var MongoClient */
     private $client;
-    /** @var \MongoDB\Collection */
+    /** @var MongoCollection */
     private $collection;
 
     /**
      * UserService constructor.
      *
-     * @param \MongoDB\Client $client
+     * @param MongoClient $client
      * @param string          $database
      * @param string          $collection
      */
-    public function __construct(Client $client, $database='whow', $collection = 'users')
+    public function __construct(MongoClient $client, $database='whow', $collection = 'users')
     {
         $this->client = $client;
-        /** @var Collection $collection */
+        /** @var MongoCollection $collection */
         $this->collection = $client->$database->$collection;
     }
 
@@ -35,11 +36,10 @@ class UserService
      */
     public static function create($config = [])
     {
-        $host = isset($config['host']) ? $config['host'] : ['localhost'];
+        $host = isset($config['host']) ? $config['host'] : 'localhost:27017';
         $database = isset($config['database']) ? $config['database'] : 'whow';
         $replicaSet = isset($config['replicaSet']) ? $config['replicaSet'] : false;
-
-        $client = new Client("mongodb://$host", compact('replicaSet'));
+            $client = new MongoClient("mongodb://$host", compact('replicaSet'));
 
         return new self($client, $database, 'users');
     }
@@ -53,24 +53,19 @@ class UserService
      */
     public function unblockById($userId)
     {
-        $_id = new ObjectID($userId);
+        $_id = new MongoId($userId);
         $user = $this->collection->findOne(compact('_id'));
-        if ($user->status === 'active') {
-
-            return false;
-        }
-        $preBlockStatus = isset($user->preBlockStatus) ? $user->preBlockStatus : 'active';
-        $user->status = $preBlockStatus;
+        $preBlockStatus = isset($user['preBlockStatus']) ? $user['preBlockStatus'] : 'active';
         $update = [
             '$set' => [
                 'status' => $preBlockStatus,
                 'preBlockStatus' => null,
-                'updated' => time(), // 2016-11-30 23:28:22.000Z 	2016-12-01 00:28:22
+                'updated' => new MongoDate(),
             ],
         ];
-        $updateResult = $this->collection->updateOne(compact('_id'), $update);
+        $updateResult = $this->collection->update(compact('_id'), $update);
 
-        return $updateResult->isAcknowledged();
+        return $updateResult['updatedExisting'];
     }
 
 }
